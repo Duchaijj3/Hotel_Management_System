@@ -1,11 +1,11 @@
-package java.com.hotel.service.impl;
+package com.hotel.service.impl;
 
 // File: src/main/java/com/hotel/service/impl/ServiceManagementServiceImpl.java
 
-import java.com.hotel.dao.HotelServiceDao;
-import java.com.hotel.dao.impl.HotelServiceDaoImpl;
-import java.com.hotel.model.HotelService;
-import java.com.hotel.service.ServiceManagementService;
+import com.hotel.dao.HotelServiceDao;
+import com.hotel.dao.impl.HotelServiceDaoImpl;
+import com.hotel.model.HotelService;
+import com.hotel.service.ServiceManagementService;
 
 import java.math.BigDecimal;
 import java.util.List;

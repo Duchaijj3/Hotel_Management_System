@@ -1,8 +1,8 @@
-package java.com.hotel.dao;
+package com.hotel.dao;
 
 // File: src/main/java/com/hotel/dao/ServiceRequestDao.java
 
-import java.com.hotel.model.ServiceRequest;
+import com.hotel.model.ServiceRequest;
 import java.util.List;
 
 /**

@@ -1,4 +1,4 @@
-package java.com.hotel.model;
+package com.hotel.model;
 
 // File: src/main/java/model/Service.java
 

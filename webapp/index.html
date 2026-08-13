@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Management System - Project Tracking Group 6</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans h-screen overflow-hidden">
+
+<!-- ========================================================================= -->
+<!-- MÀN HÌNH ĐĂNG NHẬP                                                        -->
+<!-- ========================================================================= -->
+<div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full overflow-hidden">
+
+        <div class="bg-slate-900 p-8 text-center relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl"></div>
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-500/20 text-teal-400 mb-3 border border-teal-500/30">
+                <i class="fa-solid fa-hotel text-2xl"></i>
+            </div>
+            <h1 class="text-xl font-extrabold text-white">Hotel Management System</h1>
+            <p class="text-xs text-slate-400 mt-1">Hệ Thống Phân Quyền Chức Năng (F01 - F26)</p>
+        </div>
+
+        <div class="p-8 space-y-5">
+            <div class="bg-teal-50 border border-teal-200 rounded-xl p-3 text-xs">
+                <label class="block font-bold text-teal-800 mb-1">⚡ Chọn nhanh vai trò (Role) để kiểm tra:</label>
+                <select id="quickAccountSelect" onchange="applyQuickAccount()" class="w-full bg-white border border-teal-300 rounded px-2 py-1.5 font-semibold text-slate-700 focus:outline-none">
+                    <option value="customer" selected>Customer (Khách Hàng)</option>
+                    <option value="receptionist">Receptionist (Lễ Tân)</option>
+                    <option value="servicestaff">Service Staff (Nhân Viên Dịch Vụ / Buồng Phòng)</option>
+                    <option value="manager">Manager (Quản Lý)</option>
+                    <option value="admin">System Administrator (Quản Trị Viên)</option>
+                </select>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Tên Đăng Nhập</label>
+                    <div class="relative">
+
+                        <i class="fa-solid fa-user absolute left-3 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" id="loginUsername" value="customer_01" required class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-xs font-medium focus:outline-none focus:border-teal-500 focus:bg-white transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Mật Khẩu</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400 text-xs"></i>
+                        <input type="password" id="loginPassword" value="123456" required class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-xs font-medium focus:outline-none focus:border-teal-500 focus:bg-white transition">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl text-xs shadow-lg shadow-teal-600/30 transition duration-200">
+                    <i class="fa-solid fa-right-to-bracket mr-1.5"></i> ĐĂNG NHẬP HỆ THỐNG
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MÀN HÌNH HỆ THỐNG CHÍNH (SAU KHI ĐĂNG NHẬP)                              -->
+<!-- ========================================================================= -->
+<div id="mainApp" class="flex h-screen overflow-hidden hidden">
+
+    <!-- SIDEBAR (BÊN TRÁI) -->
+    <aside class="w-72 bg-slate-900 text-slate-300 flex flex-col shrink-0 shadow-xl border-r border-slate-800">
+        <div class="h-16 flex items-center px-6 bg-slate-950 border-b border-slate-800 justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="renderRoleDashboard()">
+                <i class="fa-solid fa-hotel text-teal-400 text-xl"></i>
+                <span class="font-extrabold text-white text-base tracking-wide">Hotel Management</span>
+            </div>
+        </div>
+
+        <!-- Card User Info -->
+        <div class="p-3 bg-slate-950/60 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-2.5 overflow-hidden">
+                <div id="userAvatar" class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center font-bold text-slate-950 shrink-0 text-xs">KH</div>
+                <div class="overflow-hidden">
+                    <div id="userNameDisplay" class="font-bold text-white text-xs truncate">Khách Hàng</div>
+
+                    <div id="userRoleBadge" class="text-[10px] text-teal-400 font-bold truncate">CUSTOMER</div>
+                </div>
+            </div>
+            <button onclick="handleLogout()" title="Đăng xuất" class="text-slate-400 hover:text-rose-400 p-1.5 transition">
+                <i class="fa-solid fa-power-off text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Menu Sidebar Lọc Động -->
+        <nav id="sidebarNav" class="flex-1 overflow-y-auto p-3 space-y-1 text-xs font-medium">
+            <!-- Chức năng render động từ JavaScript -->
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT (PHÍA BÊN PHẢI) -->
+    <main class="flex-1 flex flex-col bg-slate-100 overflow-hidden">
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+            <div class="flex items-center space-x-3">
+                <span id="currentTabBadge" class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full border border-teal-200">Tổng Quan</span>
+                <h1 id="currentTabTitle" class="text-base font-extrabold text-slate-800">Danh Sách Chức Năng (Fx) Cho Vai Trò Hiện Tại</h1>
+            </div>
+            <button onclick="handleLogout()" class="text-xs bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-3 py-1.5 rounded-lg font-bold transition">
+                <i class="fa-solid fa-right-from-bracket mr-1"></i> Đăng Xuất
+            </button>
+        </header>
+
+        <div id="mainContentView" class="flex-1 overflow-y-auto p-8">
+            <!-- Nơi hiển thị danh sách các thẻ Fx bên phải -->
+        </div>
+    </main>
+</div>
+
+<!-- ========================================================================= -->
+<!-- JAVASCRIPT XỬ LÝ                                                          -->
+<!-- ========================================================================= -->
+<script>
+    // Dữ liệu đầy đủ 26 Fx trích xuất chuẩn từ file Excel Project Tracking - Nhóm 6
+    const ALL_FX_MODULES = [
+        { id: 'f01', code: 'F01', title: 'View Hotel Information', icon: 'fa-circle-info', color: 'teal', roles: ['CUSTOMER', 'RECEPTIONIST'] },
+        { id: 'f02', code: 'F02', title: 'Search Room Availability', icon: 'fa-magnifying-glass', color: 'teal', roles: ['CUSTOMER', 'RECEPTIONIST'] },
+        { id: 'f03', code: 'F03', title: 'View Room Details', icon: 'fa-bed', color: 'teal', roles: ['CUSTOMER', 'RECEPTIONIST'] },
+        { id: 'f04', code: 'F04', title: 'Register, Login, and Recover Account', icon: 'fa-user-plus', color: 'blue', roles: ['CUSTOMER', 'RECEPTIONIST', 'SERVICE_STAFF', 'MANAGER', 'ADMIN'] },
+
+
+        { id: 'f05', code: 'F05', title: 'Manage Personal Profile', icon: 'fa-id-card', color: 'blue', roles: ['CUSTOMER', 'RECEPTIONIST', 'SERVICE_STAFF', 'MANAGER', 'ADMIN'] },
+        { id: 'f06', code: 'F06', title: 'Make a Reservation', icon: 'fa-calendar-plus', color: 'teal', roles: ['CUSTOMER', 'RECEPTIONIST'] },
+        { id: 'f07', code: 'F07', title: 'Manage Reservations', icon: 'fa-calendar-check', color: 'teal', roles: ['CUSTOMER', 'RECEPTIONIST'] },
+        { id: 'f08', code: 'F08', title: 'Manage Deposit Payments', icon: 'fa-credit-card', color: 'teal', roles: ['CUSTOMER', 'RECEPTIONIST'] },
+        { id: 'f09', code: 'F09', title: 'Manage Customers', icon: 'fa-users', color: 'amber', roles: ['RECEPTIONIST'] },
+        { id: 'f10', code: 'F10', title: 'Check In Guests', icon: 'fa-key', color: 'amber', roles: ['RECEPTIONIST'] },
+        { id: 'f11', code: 'F11', title: 'Assign and Change Rooms', icon: 'fa-door-open', color: 'amber', roles: ['RECEPTIONIST'] },
+        { id: 'f12', code: 'F12', title: 'Manage Guest Stays', icon: 'fa-clock', color: 'amber', roles: ['RECEPTIONIST'] },
+        { id: 'f13', code: 'F13', title: 'Check Out Guests', icon: 'fa-right-from-bracket', color: 'amber', roles: ['CUSTOMER', 'RECEPTIONIST'] },
+        { id: 'f14', code: 'F14', title: 'Issue Invoices & Final Payments', icon: 'fa-file-invoice-dollar', color: 'amber', roles: ['CUSTOMER', 'RECEPTIONIST'] },
+        { id: 'f15', code: 'F15', title: 'Request Hotel Services', icon: 'fa-bell-concierge', color: 'teal', roles: ['CUSTOMER', 'RECEPTIONIST'] },
+        { id: 'f16', code: 'F16', title: 'Process Service Requests', icon: 'fa-list-check', color: 'cyan', roles: ['RECEPTIONIST', 'SERVICE_STAFF'] },
+        { id: 'f17', code: 'F17', title: 'Manage Housekeeping Tasks', icon: 'fa-broom', color: 'cyan', roles: ['SERVICE_STAFF', 'MANAGER'] },
+        { id: 'f18', code: 'F18', title: 'Inspect Rooms', icon: 'fa-clipboard-check', color: 'cyan', roles: ['SERVICE_STAFF'] },
+        { id: 'f19', code: 'F19', title: 'Manage Maintenance Issues', icon: 'fa-wrench', color: 'cyan', roles: ['SERVICE_STAFF', 'MANAGER'] },
+        { id: 'f20', code: 'F20', title: 'Manage Rooms', icon: 'fa-building', color: 'rose', roles: ['MANAGER'] },
+        { id: 'f21', code: 'F21', title: 'Manage Room Types & Amenities', icon: 'fa-layer-group', color: 'rose', roles: ['MANAGER'] },
+        { id: 'f22', code: 'F22', title: 'Manage Room Pricing', icon: 'fa-tags', color: 'rose', roles: ['MANAGER'] },
+        { id: 'f23', code: 'F23', title: 'View Management Dashboard', icon: 'fa-chart-pie', color: 'rose', roles: ['MANAGER'] },
+        { id: 'f24', code: 'F24', title: 'View Reports and Statistics', icon: 'fa-chart-line', color: 'rose', roles: ['MANAGER'] },
+
+
+        { id: 'f25', code: 'F25', title: 'Manage User Accounts and Roles', icon: 'fa-user-shield', color: 'purple', roles: ['ADMIN'] },
+        { id: 'f26', code: 'F26', title: 'Manage Email Notifications & Templates', icon: 'fa-envelope-open-text', color: 'purple', roles: ['ADMIN'] }
+    ];
+
+    // Thông tin tài khoản mẫu
+    const accounts = {
+        'customer': { name: 'Nguyễn Văn Khách', role: 'CUSTOMER', badge: 'ROLE_CUSTOMER', avatar: 'KH' },
+        'receptionist': { name: 'Trần Lễ Tân', role: 'RECEPTIONIST', badge: 'ROLE_RECEPTIONIST', avatar: 'LT' },
+        'servicestaff': { name: 'Lê Nhân Viên Service', role: 'SERVICE_STAFF', badge: 'ROLE_SERVICE_STAFF', avatar: 'NV' },
+        'manager': { name: 'Phạm Quản Lý', role: 'MANAGER', badge: 'ROLE_MANAGER', avatar: 'QL' },
+        'admin': { name: 'Quản Trị Hệ Thống', role: 'ADMIN', badge: 'ROLE_ADMIN', avatar: 'AD' }
+    };
+
+    let currentActiveUser = null;
+
+    function applyQuickAccount() {
+        const key = document.getElementById('quickAccountSelect').value;
+        document.getElementById('loginUsername').value = key + '_01';
+    }
+
+    function handleLogin(e) {
+        e.preventDefault();
+        const selectedKey = document.getElementById('quickAccountSelect').value;
+        currentActiveUser = accounts[selectedKey];
+
+        // Cập nhật thông tin User trên giao diện
+        document.getElementById('userNameDisplay').innerText = currentActiveUser.name;
+        document.getElementById('userRoleBadge').innerText = currentActiveUser.badge;
+        document.getElementById('userAvatar').innerText = currentActiveUser.avatar;
+
+        // Chuyển màn hình
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainApp').classList.remove('hidden');
+
+        // Render Sidebar & Dashboard Fx bên phải
+        renderSidebarNav(currentActiveUser.role);
+        renderRoleDashboard();
+    }
+
+    function handleLogout() {
+        document.getElementById('mainApp').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('hidden');
+    }
+
+    function renderSidebarNav(role) {
+        const nav = document.getElementById('sidebarNav');
+        const allowedFx = ALL_FX_MODULES.filter(fx => fx.roles.includes(role));
+
+        let html = `<div class="px-3 py-2 text-[10px] font-bold uppercase text-slate-500 tracking-wider">Danh Sách Chức Năng (${allowedFx.length})</div>`;
+
+        allowedFx.forEach(fx => {
+            html += `
+                    <button onclick="openFxDetail('${fx.id}')" class="nav-btn w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 flex items-center transition" id="btn-${fx.id}">
+                        <i class="fa-solid ${fx.icon} w-6 text-${fx.color}-400 text-xs"></i>
+
+                        <span class="truncate font-medium">${fx.code}. ${fx.title}</span>
+                    </button>
+                `;
+        });
+
+        nav.innerHTML = html;
+    }
+
+    // Tự động Render TẤT CẢ các Fx thuộc Role vào vùng BÊN PHẢI
+    function renderRoleDashboard() {
+        const role = currentActiveUser.role;
+        const allowedFx = ALL_FX_MODULES.filter(fx => fx.roles.includes(role));
+
+        document.getElementById('currentTabBadge').innerText = 'Tổng Quan';
+        document.getElementById('currentTabTitle').innerText = `Chức Năng Phân Quyền (${role})`;
+
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-teal-600', 'text-white', 'font-bold'));
+
+        let gridCardsHtml = `
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-slate-800">Xin chào, ${currentActiveUser.name}!</h2>
+                    <p class="text-xs text-slate-500 mt-1">Dưới đây là danh sách các tính năng (gồm <strong>${allowedFx.length} Fx</strong>) bạn có quyền truy cập:</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            `;
+
+        allowedFx.forEach(fx => {
+            gridCardsHtml += `
+                    <div onclick="openFxDetail('${fx.id}')" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition cursor-pointer flex flex-col justify-between group">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-extrabold px-2.5 py-1 rounded-lg bg-${fx.color}-50 text-${fx.color}-600 border border-${fx.color}-200">${fx.code}</span>
+                                <i class="fa-solid ${fx.icon} text-lg text-slate-400 group-hover:text-teal-600 transition"></i>
+                            </div>
+                            <h3 class="font-extrabold text-slate-800 text-sm group-hover:text-teal-600 transition mb-1.5">${fx.title}</h3>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-teal-600">
+                            <span>Truy cập Fx</span>
+                            <i class="fa-solid fa-arrow-right text-[10px] transform group-hover:translate-x-1 transition"></i>
+                        </div>
+                    </div>
+                `;
+        });
+
+        gridCardsHtml += `</div>`;
+        document.getElementById('mainContentView').innerHTML = gridCardsHtml;
+    }
+
+    function openFxDetail(fxId) {
+        const fx = ALL_FX_MODULES.find(item => item.id === fxId);
+        if (!fx) return;
+
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-teal-600', 'text-white', 'font-bold'));
+        const activeBtn = document.getElementById('btn-' + fxId);
+        if (activeBtn) activeBtn.classList.add('bg-teal-600', 'text-white', 'font-bold');
+
+        document.getElementById('currentTabBadge').innerText = fx.code;
+        document.getElementById('currentTabTitle').innerText = fx.title;
+
+        document.getElementById('mainContentView').innerHTML = `
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
+                                <i class="fa-solid ${fx.icon} text-lg"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-extrabold text-slate-800">${fx.code} - ${fx.title}</h2>
+                                <p class="text-xs text-slate-500">Màn hình xử lý chức năng thuộc vai trò ${currentActiveUser.role}</p>
+                            </div>
+                        </div>
+                        <button onclick="renderRoleDashboard()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg font-bold transition">
+                            <i class="fa-solid fa-grid-2 mr-1"></i> Xem Tất Cả Fx
+                        </button>
+                    </div>
+
+                    <div class="p-8 border-2 border-dashed border-slate-200 rounded-xl text-center">
+                        <i class="fa-solid ${fx.icon} text-4xl text-slate-300 mb-2"></i>
+                        <p class="text-xs text-slate-500 font-medium">Nội dung chi tiết của module <strong class="text-slate-700">${fx.code}</strong> đang được hiển thị ở đây.</p>
+                    </div>
+                </div>
+            `;
+    }
+</script>
+</body>
+</html>

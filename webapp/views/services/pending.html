@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pending Service Requests</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<!-- Header Fragment -->
+<div th:insert="~{fragments/header :: header}"></div>
+
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="mb-3">Pending Service Requests</h2>
+
+            <!-- Filter by Status -->
+            <div class="mb-3">
+                <a th:href="@{/service-requests/pending(status='pending')}" class="btn btn-outline-warning">Pending</a>
+                <a th:href="@{/service-requests/pending(status='processing')}" class="btn btn-outline-info">Processing</a>
+                <a th:href="@{/service-requests/pending}" class="btn btn-outline-success">All Pending</a>
+            </div>
+
+            <!-- Service Requests Table -->
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Request ID</th>
+                        <th>Booking Code</th>
+                        <th>Service Name</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total Price</th>
+                        <th>Status</th>
+                        <th>Requested At</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="request : ${serviceRequests}">
+                        <td th:text="${request.id}">1</td>
+                        <td><strong th:text="${request.bookingCode}">BK-1001</strong></td>
+                        <td th:text="${request.service != null ? request.service.serviceName : '-'}">Giặt ủi</td>
+                        <td th:text="${request.quantity}">2</td>
+                        <td th:text="${request.service != null ? #numbers.formatDecimal(request.service.unitPrice, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : '-'}">50,000 VNĐ</td>
+                        <td class="fw-bold text-primary" th:text="${#numbers.formatDecimal(request.totalPrice, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">100,000 VNĐ</td>
+                        <td>
+                            <span th:if="${request.status == 'PENDING' or request.status == 'pending'}" class="badge bg-warning text-dark">Pending</span>
+                            <span th:if="${request.status == 'PROCESSING' or request.status == 'processing'}" class="badge bg-info">Processing</span>
+                            <span th:if="${request.status == 'COMPLETED' or request.status == 'completed'}" class="badge bg-success">Completed</span>
+                        </td>
+                        <td>
+                            <!-- Format nếu là LocalDateTime / LocalDate -->
+                            <span th:if="${request.createdAt != null and #strings.contains(request.createdAt.class.name, 'time')}"
+                                  th:text="${#temporals.format(request.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                            <!-- Format nếu là java.util.Date -->
+                            <span th:if="${request.createdAt != null and !#strings.contains(request.createdAt.class.name, 'time')}"
+                                  th:text="${#dates.format(request.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                            <span th:if="${request.createdAt == null}">-</span>
+                        </td>
+                        <td class="text-center">
+                            <form method="POST" th:action="@{/service-requests/pending}" style="display: inline;">
+                                <input type="hidden" name="action" th:value="${request.status == 'PENDING' or request.status == 'pending' ? 'processing' : 'complete'}">
+                                <input type="hidden" name="requestId" th:value="${request.id}">
+
+                                <button type="submit"
+                                        th:class="${request.status == 'PENDING' or request.status == 'pending' ? 'btn btn-sm btn-info' : 'btn btn-sm btn-success'}"
+                                        th:text="${request.status == 'PENDING' or request.status == 'pending' ? 'Start Processing' : 'Complete'}">
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${#lists.isEmpty(serviceRequests)}" class="alert alert-info mt-3" role="alert">
+                No pending service requests found.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer Fragment -->
+<div th:insert="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

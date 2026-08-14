@@ -1,0 +1,5 @@
+<%@ page pageEncoding="UTF-8" %>
+<header class="topbar">
+    <div><span class="module-badge">${moduleCode}</span><strong>${pageTitle}</strong></div>
+    <a class="logout" href="${pageContext.request.contextPath}/logout">↪ Đăng xuất</a>
+</header>

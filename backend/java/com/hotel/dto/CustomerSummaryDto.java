@@ -1,2 +1,2 @@
 package com.hotel.dto;
-public record CustomerSummaryDto(long id,String code,String fullName,String phone,String email,String idNumber,String status){}
+public record CustomerSummaryDto(long id,String code,String fullName,String phone,String email,String idNumber,String status){public long getId(){return id;} public String getCode(){return code;} public String getFullName(){return fullName;} public String getPhone(){return phone;} public String getEmail(){return email;} public String getIdNumber(){return idNumber;} public String getStatus(){return status;}}

@@ -1,8 +1,8 @@
-package java.com.hotel;
+package com.hotel;
 
 
 
-import java.com.hotel.util.DBConnection;
+import com.hotel.util.DBConnection;
 
 import java.sql.Connection;
 

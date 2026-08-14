@@ -1,9 +1,9 @@
-package java.com.hotel.service;
+package com.hotel.service;
 
 //  File: src/main/java/com/hotel/service/ServiceManagementService.java
 
 
-import java.com.hotel.model.HotelService;
+import com.hotel.model.HotelService;
 import java.math.BigDecimal;
 import java.util.List;
 

@@ -1,7 +1,7 @@
-package java.com.hotel.service;
+package com.hotel.service;
 
 // File: src/main/java/com/hotel/service/ServiceRequestService.java
-import java.com.hotel.model.ServiceRequest;
+import com.hotel.model.ServiceRequest;
 import java.util.List;
 
 /**

@@ -1,12 +1,12 @@
-package java.com.hotel.dao.impl;
+package com.hotel.dao.impl;
 
 // File: src/main/java/com/hotel/dao/impl/ServiceRequestDaoImpl.java
 
 
-import java.com.hotel.dao.ServiceRequestDao;
-import java.com.hotel.model.HotelService;
-import java.com.hotel.model.ServiceRequest;
-import java.com.hotel.util.DBConnection;
+import com.hotel.dao.ServiceRequestDao;
+import com.hotel.model.HotelService;
+import com.hotel.model.ServiceRequest;
+import com.hotel.util.DBConnection;
 
 import java.sql.*;
 import java.util.ArrayList;

@@ -25,6 +25,8 @@ bin/
 
 ### VS Code ###
 .vscode/
+target/
+backend/resources/database.properties
 
 ### Mac OS ###
 .DS_Store

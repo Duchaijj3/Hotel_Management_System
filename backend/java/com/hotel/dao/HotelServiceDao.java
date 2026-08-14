@@ -1,8 +1,8 @@
-package java.com.hotel.dao;
+package com.hotel.dao;
 // File: src/main/java/com/hotel/dao/ServiceDao.java
 
 
-import java.com.hotel.model.HotelService;
+import com.hotel.model.HotelService;
 import java.util.List;
 
 /**

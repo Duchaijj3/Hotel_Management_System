@@ -1,4 +1,4 @@
-package java.com.hotel.util;
+package com.hotel.util;
 
 
 

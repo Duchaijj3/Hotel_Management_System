@@ -1,13 +1,13 @@
-package java.com.hotel.service.impl;
+package com.hotel.service.impl;
 
 
-import java.com.hotel.dao.HotelServiceDao;
-import java.com.hotel.dao.ServiceRequestDao;
-import java.com.hotel.dao.impl.HotelServiceDaoImpl;
-import java.com.hotel.dao.impl.ServiceRequestDaoImpl;
-import java.com.hotel.model.HotelService;
-import java.com.hotel.model.ServiceRequest;
-import java.com.hotel.service.ServiceRequestService;
+import com.hotel.dao.HotelServiceDao;
+import com.hotel.dao.ServiceRequestDao;
+import com.hotel.dao.impl.HotelServiceDaoImpl;
+import com.hotel.dao.impl.ServiceRequestDaoImpl;
+import com.hotel.model.HotelService;
+import com.hotel.model.ServiceRequest;
+import com.hotel.service.ServiceRequestService;
 
 import java.math.BigDecimal;
 import java.util.List;

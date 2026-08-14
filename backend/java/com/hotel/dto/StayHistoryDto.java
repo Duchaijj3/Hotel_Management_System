@@ -1,3 +1,3 @@
 package com.hotel.dto;
 import java.time.LocalDateTime;
-public record StayHistoryDto(String bookingCode,LocalDateTime actualCheckIn,LocalDateTime actualCheckOut,String roomNumber,String roomType,LocalDateTime assignedAt,LocalDateTime unassignedAt,boolean current){}
+public record StayHistoryDto(String bookingCode,LocalDateTime actualCheckIn,LocalDateTime actualCheckOut,String roomNumber,String roomType,LocalDateTime assignedAt,LocalDateTime unassignedAt,boolean current){public String getBookingCode(){return bookingCode;} public LocalDateTime getActualCheckIn(){return actualCheckIn;} public LocalDateTime getActualCheckOut(){return actualCheckOut;} public String getRoomNumber(){return roomNumber;} public String getRoomType(){return roomType;} public LocalDateTime getAssignedAt(){return assignedAt;} public LocalDateTime getUnassignedAt(){return unassignedAt;} public boolean isCurrent(){return current;}}

@@ -1,3 +1,3 @@
 package com.hotel.dto;
 import java.math.BigDecimal; import java.time.*;
-public record ReservationHistoryDto(String bookingCode,LocalDate checkIn,LocalDate checkOut,String status,int adults,int children,BigDecimal total,LocalDateTime bookedAt){}
+public record ReservationHistoryDto(String bookingCode,LocalDate checkIn,LocalDate checkOut,String status,int adults,int children,BigDecimal total,LocalDateTime bookedAt){public String getBookingCode(){return bookingCode;} public LocalDate getCheckIn(){return checkIn;} public LocalDate getCheckOut(){return checkOut;} public String getStatus(){return status;} public int getAdults(){return adults;} public int getChildren(){return children;} public BigDecimal getTotal(){return total;} public LocalDateTime getBookedAt(){return bookedAt;}}

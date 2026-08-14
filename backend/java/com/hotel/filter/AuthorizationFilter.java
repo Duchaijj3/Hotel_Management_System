@@ -1,0 +1,3 @@
+package com.hotel.filter;
+import com.hotel.dto.SessionUser; import jakarta.servlet.*; import jakarta.servlet.annotation.WebFilter; import jakarta.servlet.http.*; import java.io.IOException;
+@WebFilter("/receptionist/*") public class AuthorizationFilter implements Filter { public void doFilter(ServletRequest a,ServletResponse b,FilterChain c)throws IOException,ServletException{HttpSession h=((HttpServletRequest)a).getSession(false);SessionUser u=h==null?null:(SessionUser)h.getAttribute("sessionUser");if(u!=null&&!"RECEPTIONIST".equals(u.roleCode())){((HttpServletResponse)b).sendError(403);return;}c.doFilter(a,b);} }

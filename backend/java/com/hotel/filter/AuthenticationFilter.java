@@ -1,0 +1,3 @@
+package com.hotel.filter;
+import com.hotel.dto.SessionUser; import jakarta.servlet.*; import jakarta.servlet.annotation.WebFilter; import jakarta.servlet.http.*; import java.io.IOException;
+@WebFilter("/receptionist/*") public class AuthenticationFilter implements Filter { public void doFilter(ServletRequest a,ServletResponse b,FilterChain c)throws IOException,ServletException{HttpServletRequest q=(HttpServletRequest)a;HttpSession h=q.getSession(false);if(h==null||!(h.getAttribute("sessionUser") instanceof SessionUser)){((HttpServletResponse)b).sendRedirect(q.getContextPath()+"/login");return;}c.doFilter(a,b);} }

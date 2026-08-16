@@ -24,6 +24,11 @@ class RoomAvailabilityPolicyTest {
         assertFalse(candidate(true, true, "AVAILABLE", "CLEANING", 1, 1));
     }
 
+    @Test void cleanButNotInspectedRoomIsExcluded() {
+        assertFalse(candidate(true, true, "AVAILABLE", "CLEAN", 1, 1));
+        assertTrue(candidate(true, true, "AVAILABLE", "INSPECTED", 1, 1));
+    }
+
     @Test void wrongRoomTypeIsExcluded() {
         assertFalse(candidate(true, true, "AVAILABLE", "INSPECTED", 2, 1));
     }

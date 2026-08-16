@@ -1,19 +1,12 @@
 <%@ page pageEncoding="UTF-8" %>
 <aside class="sidebar">
-    <a class="brand" href="${pageContext.request.contextPath}/receptionist/customers">
-        <span class="brand-mark">H</span><span>Grand Horizon</span>
-    </a>
-    <div class="staff-card">
-        <span class="avatar">LT</span>
-        <span class="staff-copy"><strong><c:out value="${sessionScope.sessionUser.fullName}"/></strong><small>ROLE_RECEPTIONIST</small></span>
-        <a class="power" href="${pageContext.request.contextPath}/logout" title="Đăng xuất">↪</a>
-    </div>
-    <nav class="side-nav" aria-label="Receptionist navigation">
-        <p class="nav-label">II. LỄ TÂN (UC24 – UC29)</p>
-        <a class="${activePage=='customers'?'active':''}" href="${pageContext.request.contextPath}/receptionist/customers"><span>⌕</span> UC24. Tra cứu khách hàng</a>
-        <a class="${activePage=='create'?'active':''}" href="${pageContext.request.contextPath}/receptionist/customers/create"><span>＋</span> UC26. Khách walk-in</a>
-        <a class="${activePage=='rooms'?'active':''}" href="${pageContext.request.contextPath}/receptionist/rooms/available"><span>▦</span> UC29. Phòng trống</a>
-        <p class="nav-label secondary">THAO TÁC NHANH</p>
-        <a href="${pageContext.request.contextPath}/receptionist/customers?status=ACTIVE"><span>●</span> Khách đang hoạt động</a>
+    <div class="staff-card"><span class="avatar">LT</span><span class="staff-copy"><strong>Bộ phận lễ tân</strong><small><c:out value="${sessionScope.sessionUser.fullName}"/> • Đang làm việc</small></span></div>
+    <nav class="side-nav">
+        <p class="nav-label">NGHIỆP VỤ LỄ TÂN</p>
+        <a class="${activePage=='customers'?'active':''}" href="${pageContext.request.contextPath}/receptionist/customers"><span class="material-symbols-outlined">group</span>Quản lý khách hàng</a>
+        <a class="${activePage=='create'?'active':''}" href="${pageContext.request.contextPath}/receptionist/customers/create"><span class="material-symbols-outlined">person_add</span>Tạo khách vãng lai</a>
+        <a class="${activePage=='checkin'?'active':''}" href="${pageContext.request.contextPath}/receptionist/check-in"><span class="material-symbols-outlined">how_to_reg</span>Nhận phòng</a>
+        <a class="${activePage=='rooms'?'active':''}" href="${pageContext.request.contextPath}/receptionist/rooms/available"><span class="material-symbols-outlined">bed</span>Tra cứu phòng trống</a>
+        <a class="${activePage=='history'?'active':''}" href="${pageContext.request.contextPath}/receptionist/assignments/history"><span class="material-symbols-outlined">history</span>Lịch sử gán phòng</a>
     </nav>
 </aside>

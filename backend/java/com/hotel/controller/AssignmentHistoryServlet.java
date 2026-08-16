@@ -1,0 +1,6 @@
+package com.hotel.controller;
+
+import com.hotel.dao.impl.FrontDeskDaoImpl; import com.hotel.exception.DataAccessException; import com.hotel.service.FrontDeskService; import com.hotel.service.impl.FrontDeskServiceImpl; import com.hotel.util.DBConnection;
+import jakarta.servlet.*; import jakarta.servlet.annotation.WebServlet; import jakarta.servlet.http.*; import java.io.IOException;
+
+@WebServlet("/receptionist/assignments/history") public class AssignmentHistoryServlet extends HttpServlet {private final FrontDeskService service=new FrontDeskServiceImpl(new FrontDeskDaoImpl(),DBConnection::getConnection);protected void doGet(HttpServletRequest q,HttpServletResponse s)throws ServletException,IOException{String keyword=q.getParameter("keyword");try{var rows=service.history(keyword);q.setAttribute("history",rows);if(rows.isEmpty()&&keyword!=null&&!keyword.isBlank())q.setAttribute("error","Không tìm thấy lịch sử phù hợp.");flash(q);q.getRequestDispatcher("/WEB-INF/views/receptionist/rooms/history.jsp").forward(q,s);}catch(DataAccessException e){getServletContext().log("Assignment history failed",e);s.sendError(500);}}private void flash(HttpServletRequest q){Object x=q.getSession().getAttribute("flashSuccess");if(x!=null){q.setAttribute("success",x);q.getSession().removeAttribute("flashSuccess");}}}

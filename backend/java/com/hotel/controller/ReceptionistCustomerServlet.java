@@ -1,3 +1,196 @@
 package com.hotel.controller;
-import com.hotel.dao.impl.CustomerDaoImpl; import com.hotel.dto.*; import com.hotel.exception.*; import com.hotel.service.CustomerService; import com.hotel.service.impl.CustomerServiceImpl; import jakarta.servlet.*; import jakarta.servlet.annotation.WebServlet; import jakarta.servlet.http.*; import java.io.IOException; import java.time.*; import java.util.*;
-@WebServlet(urlPatterns={"/receptionist/customers","/receptionist/customers/view","/receptionist/customers/create","/receptionist/customers/edit","/receptionist/customers/update"}) public class ReceptionistCustomerServlet extends HttpServlet {private final CustomerService service=new CustomerServiceImpl(new CustomerDaoImpl());protected void doGet(HttpServletRequest q,HttpServletResponse s)throws ServletException,IOException{try{switch(q.getServletPath()){case "/receptionist/customers"->list(q,s);case "/receptionist/customers/view"->detail(q,s);case "/receptionist/customers/create"->{q.setAttribute("mode","create");view(q,s,"form.jsp");}case "/receptionist/customers/edit"->{CustomerDetailDto d=service.detail(id(q)).orElseThrow();q.setAttribute("customer",new CustomerFormDto(d.id(),d.fullName(),d.email(),d.phone(),d.dateOfBirth(),d.idType(),d.idNumber(),d.nationality(),d.address(),d.updatedAt()));q.setAttribute("mode","edit");view(q,s,"form.jsp");}default->s.sendError(404);}}catch(NoSuchElementException|NumberFormatException e){s.sendError(404);}catch(DataAccessException e){getServletContext().log("Customer operation failed",e);s.sendError(500);}}protected void doPost(HttpServletRequest q,HttpServletResponse s)throws ServletException,IOException{CustomerFormDto f=form(q);q.setAttribute("customer",f);try{long id;if(q.getServletPath().endsWith("create")){SessionUser u=(SessionUser)q.getSession().getAttribute("sessionUser");id=service.create(f,u.userId());flash(q,"Walk-in customer created.");}else{service.update(f);id=f.id();flash(q,"Customer updated.");}s.sendRedirect(q.getContextPath()+"/receptionist/customers/view?id="+id);}catch(ValidationException e){q.setAttribute("errors",e.getErrors());q.setAttribute("mode",q.getServletPath().endsWith("create")?"create":"edit");view(q,s,"form.jsp");}catch(DataAccessException e){getServletContext().log("Customer write failed",e);s.sendError(500);}}private void list(HttpServletRequest q,HttpServletResponse s)throws ServletException,IOException{int page=parse(q.getParameter("page"),1);CustomerSearchCriteria c=new CustomerSearchCriteria(q.getParameter("keyword"),q.getParameter("status"),page,20);q.setAttribute("criteria",c);q.setAttribute("result",service.search(c));view(q,s,"list.jsp");}private void detail(HttpServletRequest q,HttpServletResponse s)throws ServletException,IOException{CustomerDetailDto d=service.detail(id(q)).orElseThrow();q.setAttribute("customer",d);HttpSession h=q.getSession();q.setAttribute("flash",h.getAttribute("flash"));h.removeAttribute("flash");view(q,s,"detail.jsp");}private long id(HttpServletRequest q){return Long.parseLong(q.getParameter("id"));}private int parse(String x,int d){try{return Integer.parseInt(x);}catch(Exception e){return d;}}private CustomerFormDto form(HttpServletRequest q){return new CustomerFormDto(q.getParameter("id")==null?null:Long.valueOf(q.getParameter("id")),trim(q,"fullName"),trim(q,"email"),trim(q,"phone"),date(q.getParameter("dateOfBirth")),trim(q,"idDocumentType"),trim(q,"idDocumentNumber"),trim(q,"nationality"),trim(q,"address"),q.getParameter("version")==null?null:LocalDateTime.parse(q.getParameter("version")));}private String trim(HttpServletRequest q,String n){String v=q.getParameter(n);return v==null||v.trim().isEmpty()?null:v.trim();}private LocalDate date(String v){return v==null||v.isBlank()?null:LocalDate.parse(v);}private void flash(HttpServletRequest q,String v){q.getSession().setAttribute("flash",v);}private void view(HttpServletRequest q,HttpServletResponse s,String name)throws ServletException,IOException{q.getRequestDispatcher("/WEB-INF/views/receptionist/customers/"+name).forward(q,s);}}
+
+import com.hotel.dao.impl.CustomerDaoImpl;
+import com.hotel.dto.CustomerDetailDto;
+import com.hotel.dto.CustomerFormDto;
+import com.hotel.dto.CustomerSearchCriteria;
+import com.hotel.dto.SessionUser;
+import com.hotel.exception.DataAccessException;
+import com.hotel.exception.ValidationException;
+import com.hotel.service.CustomerService;
+import com.hotel.service.impl.CustomerServiceImpl;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
+@WebServlet(urlPatterns = {"/receptionist/customers", "/receptionist/customers/view",
+        "/receptionist/customers/create", "/receptionist/customers/edit",
+        "/receptionist/customers/update"})
+public class ReceptionistCustomerServlet extends HttpServlet {
+    private final CustomerService service = new CustomerServiceImpl(new CustomerDaoImpl());
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            switch (request.getServletPath()) {
+                case "/receptionist/customers" -> list(request, response);
+                case "/receptionist/customers/view" -> detail(request, response);
+                case "/receptionist/customers/create" -> {
+                    request.setAttribute("mode", "create");
+                    view(request, response, "form.jsp");
+                }
+                case "/receptionist/customers/edit" -> edit(request, response);
+                default -> response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            }
+        } catch (NoSuchElementException | NumberFormatException exception) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        } catch (DataAccessException exception) {
+            getServletContext().log("Customer operation failed", exception);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String mode = request.getServletPath().endsWith("create") ? "create" : "edit";
+        try {
+            CustomerFormDto form = bindForm(request, mode.equals("edit"));
+            request.setAttribute("customer", form);
+            long customerId;
+            if (mode.equals("create")) {
+                SessionUser user = (SessionUser) request.getSession().getAttribute("sessionUser");
+                customerId = service.create(form, user.userId());
+                flash(request, "Walk-in customer created.");
+            } else {
+                service.update(form);
+                customerId = form.id();
+                flash(request, "Customer updated.");
+            }
+            response.sendRedirect(request.getContextPath()
+                    + "/receptionist/customers/view?id=" + customerId);
+        } catch (ValidationException exception) {
+            request.setAttribute("customer", bindLenient(request));
+            request.setAttribute("errors", exception.getErrors());
+            request.setAttribute("mode", mode);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            view(request, response, "form.jsp");
+        } catch (DataAccessException exception) {
+            getServletContext().log("Customer write failed", exception);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private void list(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int page = parsePositiveInt(request.getParameter("page"), 1);
+        CustomerSearchCriteria criteria = new CustomerSearchCriteria(
+                request.getParameter("keyword"), request.getParameter("status"), page, 20);
+        request.setAttribute("criteria", criteria);
+        request.setAttribute("result", service.search(criteria));
+        view(request, response, "list.jsp");
+    }
+
+    private void detail(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        CustomerDetailDto customer = service.detail(requiredId(request)).orElseThrow();
+        request.setAttribute("customer", customer);
+        HttpSession session = request.getSession();
+        request.setAttribute("flash", session.getAttribute("flash"));
+        session.removeAttribute("flash");
+        view(request, response, "detail.jsp");
+    }
+
+    private void edit(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        CustomerDetailDto customer = service.detail(requiredId(request)).orElseThrow();
+        request.setAttribute("customer", new CustomerFormDto(customer.id(), customer.fullName(),
+                customer.email(), customer.phone(), customer.dateOfBirth(), customer.idType(),
+                customer.idNumber(), customer.nationality(), customer.address(), customer.updatedAt()));
+        request.setAttribute("mode", "edit");
+        view(request, response, "form.jsp");
+    }
+
+    private CustomerFormDto bindForm(HttpServletRequest request, boolean update)
+            throws ValidationException {
+        Map<String, String> error;
+        Long id = null;
+        LocalDateTime version = null;
+        LocalDate dateOfBirth = null;
+        try {
+            if (update) {
+                id = Long.valueOf(request.getParameter("id"));
+                if (id <= 0) throw new NumberFormatException();
+                version = LocalDateTime.parse(request.getParameter("version"));
+            }
+        } catch (RuntimeException exception) {
+            error = Map.of("general", "Invalid customer or update version. Reload the form.");
+            throw new ValidationException(error);
+        }
+        try {
+            String rawDate = request.getParameter("dateOfBirth");
+            if (rawDate != null && !rawDate.isBlank()) {
+                dateOfBirth = LocalDate.parse(rawDate);
+            }
+        } catch (DateTimeParseException exception) {
+            throw new ValidationException(Map.of("dateOfBirth", "Invalid date of birth."));
+        }
+        return new CustomerFormDto(id, trim(request, "fullName"), trim(request, "email"),
+                trim(request, "phone"), dateOfBirth, trim(request, "idDocumentType"),
+                trim(request, "idDocumentNumber"), trim(request, "nationality"),
+                trim(request, "address"), version);
+    }
+
+    private CustomerFormDto bindLenient(HttpServletRequest request) {
+        return new CustomerFormDto(safeLong(request.getParameter("id")), trim(request, "fullName"),
+                trim(request, "email"), trim(request, "phone"), safeDate(request.getParameter("dateOfBirth")),
+                trim(request, "idDocumentType"), trim(request, "idDocumentNumber"),
+                trim(request, "nationality"), trim(request, "address"),
+                safeDateTime(request.getParameter("version")));
+    }
+
+    private long requiredId(HttpServletRequest request) {
+        long id = Long.parseLong(request.getParameter("id"));
+        if (id <= 0) throw new NumberFormatException();
+        return id;
+    }
+
+    private int parsePositiveInt(String value, int fallback) {
+        try {
+            return Math.max(1, Integer.parseInt(value));
+        } catch (RuntimeException exception) {
+            return fallback;
+        }
+    }
+
+    private Long safeLong(String value) {
+        try { return value == null ? null : Long.valueOf(value); }
+        catch (RuntimeException exception) { return null; }
+    }
+
+    private LocalDate safeDate(String value) {
+        try { return value == null || value.isBlank() ? null : LocalDate.parse(value); }
+        catch (RuntimeException exception) { return null; }
+    }
+
+    private LocalDateTime safeDateTime(String value) {
+        try { return value == null || value.isBlank() ? null : LocalDateTime.parse(value); }
+        catch (RuntimeException exception) { return null; }
+    }
+
+    private String trim(HttpServletRequest request, String name) {
+        String value = request.getParameter(name);
+        return value == null || value.trim().isEmpty() ? null : value.trim();
+    }
+
+    private void flash(HttpServletRequest request, String value) {
+        request.getSession().setAttribute("flash", value);
+    }
+
+    private void view(HttpServletRequest request, HttpServletResponse response, String name)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/WEB-INF/views/receptionist/customers/" + name)
+                .forward(request, response);
+    }
+}

@@ -16,7 +16,7 @@ public final class RoomAvailabilityPolicy {
         return roomActive
                 && roomTypeActive
                 && "AVAILABLE".equals(operationalStatus)
-                && ("CLEAN".equals(cleaningStatus) || "INSPECTED".equals(cleaningStatus))
+                && "INSPECTED".equals(cleaningStatus)
                 && actualRoomTypeId == requestedRoomTypeId;
     }
 

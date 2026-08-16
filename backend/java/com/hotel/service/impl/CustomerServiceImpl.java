@@ -1,3 +1,103 @@
 package com.hotel.service.impl;
-import com.hotel.dao.CustomerDao; import com.hotel.dto.*; import com.hotel.exception.ValidationException; import com.hotel.service.CustomerService; import java.time.LocalDate; import java.util.*;
-public class CustomerServiceImpl implements CustomerService {private final CustomerDao dao;public CustomerServiceImpl(CustomerDao dao){this.dao=dao;}public PageResult<CustomerSummaryDto> search(CustomerSearchCriteria c){return dao.search(c);}public Optional<CustomerDetailDto> detail(long id){return dao.findDetail(id);}public long create(CustomerFormDto f,long creator)throws ValidationException{validate(f);return dao.create(f,creator,"WI-"+UUID.randomUUID().toString().replace("-","").substring(0,16).toUpperCase());}public void update(CustomerFormDto f)throws ValidationException{if(f.id()==null||dao.findDetail(f.id()).isEmpty())throw new ValidationException(Map.of("general","Customer not found."));validate(f);if(!dao.update(f))throw new ValidationException(Map.of("general","Customer was changed by another user. Reload and try again."));}private void validate(CustomerFormDto f)throws ValidationException{Map<String,String>e=new LinkedHashMap<>();if(f.fullName()==null||f.fullName().isBlank())e.put("fullName","Full name is required.");else if(f.fullName().length()>150)e.put("fullName","Maximum 150 characters.");if(f.email()!=null&&!f.email().isBlank()&&!f.email().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"))e.put("email","Invalid email.");if(f.dateOfBirth()!=null&&f.dateOfBirth().isAfter(LocalDate.now()))e.put("dateOfBirth","Date cannot be in the future.");boolean t=f.idDocumentType()!=null&&!f.idDocumentType().isBlank(),n=f.idDocumentNumber()!=null&&!f.idDocumentNumber().isBlank();if(t!=n)e.put("idDocumentNumber","Identification type and number must both be supplied.");if(t&&n&&dao.documentExists(f.idDocumentType(),f.idDocumentNumber(),f.id()))e.put("idDocumentNumber","Identification already exists.");max(e,"email",f.email(),255);max(e,"phone",f.phone(),30);max(e,"nationality",f.nationality(),80);max(e,"address",f.address(),255);if(!e.isEmpty())throw new ValidationException(e);}private void max(Map<String,String>e,String k,String v,int n){if(v!=null&&v.length()>n)e.put(k,"Maximum "+n+" characters.");}}
+
+import com.hotel.dao.CustomerDao;
+import com.hotel.dto.CustomerDetailDto;
+import com.hotel.dto.CustomerFormDto;
+import com.hotel.dto.CustomerSearchCriteria;
+import com.hotel.dto.CustomerSummaryDto;
+import com.hotel.dto.PageResult;
+import com.hotel.exception.ValidationException;
+import com.hotel.service.CustomerService;
+
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+public class CustomerServiceImpl implements CustomerService {
+    private final CustomerDao dao;
+
+    public CustomerServiceImpl(CustomerDao dao) {
+        this.dao = dao;
+    }
+
+    @Override
+    public PageResult<CustomerSummaryDto> search(CustomerSearchCriteria criteria) {
+        return dao.search(criteria);
+    }
+
+    @Override
+    public Optional<CustomerDetailDto> detail(long id) {
+        return id > 0 ? dao.findDetail(id) : Optional.empty();
+    }
+
+    @Override
+    public long create(CustomerFormDto form, long creatorUserId) throws ValidationException {
+        if (creatorUserId <= 0) {
+            throw new ValidationException(Map.of("general", "Receptionist session is invalid."));
+        }
+        validate(form, false);
+        String customerCode = "WI-" + UUID.randomUUID().toString()
+                .replace("-", "").substring(0, 16).toUpperCase();
+        return dao.create(form, creatorUserId, customerCode);
+    }
+
+    @Override
+    public void update(CustomerFormDto form) throws ValidationException {
+        if (form.id() == null || form.id() <= 0 || dao.findDetail(form.id()).isEmpty()) {
+            throw new ValidationException(Map.of("general", "Customer not found."));
+        }
+        validate(form, true);
+        if (!dao.update(form)) {
+            throw new ValidationException(Map.of("general",
+                    "Customer was changed by another user. Reload and try again."));
+        }
+    }
+
+    private void validate(CustomerFormDto form, boolean updating) throws ValidationException {
+        Map<String, String> errors = new LinkedHashMap<>();
+        if (form.fullName() == null || form.fullName().isBlank()) {
+            errors.put("fullName", "Full name is required.");
+        } else if (form.fullName().length() > 150) {
+            errors.put("fullName", "Maximum 150 characters.");
+        }
+
+        if (form.email() != null && !form.email().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            errors.put("email", "Invalid email address.");
+        }
+        if (form.dateOfBirth() != null && form.dateOfBirth().isAfter(LocalDate.now())) {
+            errors.put("dateOfBirth", "Date of birth cannot be in the future.");
+        }
+
+        boolean hasDocumentType = form.idDocumentType() != null;
+        boolean hasDocumentNumber = form.idDocumentNumber() != null;
+        if (hasDocumentType != hasDocumentNumber) {
+            errors.put("idDocumentNumber", "Identification type and number must both be supplied.");
+        }
+
+        max(errors, "email", form.email(), 255);
+        max(errors, "phone", form.phone(), 30);
+        max(errors, "idDocumentType", form.idDocumentType(), 30);
+        max(errors, "idDocumentNumber", form.idDocumentNumber(), 50);
+        max(errors, "nationality", form.nationality(), 80);
+        max(errors, "address", form.address(), 255);
+
+        if (updating && form.version() == null) {
+            errors.put("general", "The update version is missing. Reload the customer form.");
+        }
+        if (errors.isEmpty() && hasDocumentType
+                && dao.documentExists(form.idDocumentType(), form.idDocumentNumber(), form.id())) {
+            errors.put("idDocumentNumber", "Identification already exists.");
+        }
+        if (!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+    }
+
+    private void max(Map<String, String> errors, String field, String value, int maximum) {
+        if (value != null && value.length() > maximum) {
+            errors.put(field, "Maximum " + maximum + " characters.");
+        }
+    }
+}

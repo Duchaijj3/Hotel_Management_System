@@ -1,26 +1,14 @@
 package com.hotel.service;
 
-// File: src/main/java/com/hotel/service/ServiceRequestService.java
-import com.hotel.model.ServiceRequest;
+import com.hotel.dto.ServiceRequestDto;
+import com.hotel.exception.BusinessException;
 import java.util.List;
 
-/**
- * Service interface cho service requests - cập nhật với tính năng mới
- */
 public interface ServiceRequestService {
-    // Guest requests service
-    void requestService(long reservationId, long customerId, long hotelServiceId,
-                        java.math.BigDecimal quantity) throws Exception;
-
-    // Staff management
-    List<ServiceRequest> getPendingRequests() throws Exception;
-    List<ServiceRequest> getAssignedToMe(long staffUserId) throws Exception;
-    void assignServiceToStaff(long serviceRequestId, long staffUserId) throws Exception;
-    void startService(long serviceRequestId) throws Exception;
-    void completeService(long serviceRequestId) throws Exception;
-    void cancelService(long serviceRequestId, String reason) throws Exception;
-
-    // Billing integration
-    List<ServiceRequest> getCompletedServicesForReservation(long reservationId) throws Exception;
-    java.math.BigDecimal calculateServiceChargesForReservation(long reservationId) throws Exception;
+    List<ServiceRequestDto> getPendingRequests();
+    List<ServiceRequestDto> getMyTasks(long staffId);
+    void cancelTask(long requestId, long staffId, String reason) throws BusinessException;
+    void acceptTask(long requestId, long staffId) throws BusinessException;
+    void startTask(long requestId, long staffId) throws BusinessException;
+    void completeTask(long requestId, long staffId) throws BusinessException;
 }

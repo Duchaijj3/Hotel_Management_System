@@ -8,14 +8,14 @@ import java.util.*;
 public class ServiceRequestDaoImpl implements ServiceRequestDao {
 
     public List<ServiceRequestDto> findPending(Connection c) throws SQLException {
-        String sql = "SELECT r.*, s.service_name FROM service_requests r JOIN hotel_services s ON r.hotel_service_id = s.service_id WHERE r.status = 'PENDING' ORDER BY r.requested_at ASC";
+        String sql = "SELECT r.*, s.service_name FROM service_requests r JOIN hotel_services s ON r.hotel_service_id = s.hotel_service_id WHERE r.status_code = 'PENDING' ORDER BY r.requested_at ASC";
         try(PreparedStatement p = c.prepareStatement(sql)) {
             return mapList(p.executeQuery());
         }
     }
 
     public List<ServiceRequestDto> findAssignedTo(Connection c, long staffId) throws SQLException {
-        String sql = "SELECT r.*, s.service_name FROM service_requests r JOIN hotel_services s ON r.hotel_service_id = s.service_id WHERE r.assigned_staff_id = ? AND r.status IN ('ASSIGNED', 'IN_PROGRESS') ORDER BY r.requested_at ASC";
+        String sql = "SELECT r.*, s.service_name FROM service_requests r JOIN hotel_services s ON r.hotel_service_id = s.hotel_service_id WHERE r.assigned_staff_user_id = ? AND r.status_code IN ('ASSIGNED', 'IN_PROGRESS') ORDER BY r.requested_at ASC";
         try(PreparedStatement p = c.prepareStatement(sql)) {
             p.setLong(1, staffId);
             return mapList(p.executeQuery());
@@ -24,7 +24,10 @@ public class ServiceRequestDaoImpl implements ServiceRequestDao {
 
     public Optional<ServiceRequestDto> findById(Connection c, long requestId, boolean lock) throws SQLException {
         // Tối ưu khóa dòng SQL Server để chống xung đột (concurrency)
-        String sql = "SELECT r.*, s.service_name FROM service_requests r JOIN hotel_services s ON r.hotel_service_id = s.service_id WHERE r.service_request_id = ?" + (lock ? " WITH (UPDLOCK, HOLDLOCK)" : "");
+        String lockHint = lock ? " WITH (UPDLOCK, HOLDLOCK)" : "";
+        String sql = "SELECT r.*, s.service_name FROM service_requests r" + lockHint
+                + " JOIN hotel_services s ON r.hotel_service_id = s.hotel_service_id"
+                + " WHERE r.service_request_id = ?";
         try(PreparedStatement p = c.prepareStatement(sql)) {
             p.setLong(1, requestId);
             List<ServiceRequestDto> list = mapList(p.executeQuery());
@@ -33,18 +36,21 @@ public class ServiceRequestDaoImpl implements ServiceRequestDao {
     }
 
     public int updateStatusAndStaff(Connection c, long requestId, String status, Long staffId) throws SQLException {
-        String sql = "UPDATE service_requests SET status = ?, assigned_staff_id = ? WHERE service_request_id = ?";
+        String sql = "UPDATE service_requests SET status_code = ?, assigned_staff_user_id = ?, "
+                + "assigned_at = CASE WHEN ? = 'ASSIGNED' AND assigned_at IS NULL "
+                + "THEN SYSUTCDATETIME() ELSE assigned_at END "
+                + "WHERE service_request_id = ?";
         try(PreparedStatement p = c.prepareStatement(sql)) {
             p.setString(1, status);
             if (staffId != null) p.setLong(2, staffId); else p.setNull(2, Types.BIGINT);
-            p.setLong(3, requestId);
+            p.setString(3, status);
+            p.setLong(4, requestId);
             return p.executeUpdate();
         }
     }
     @Override
     public int cancelRequest(Connection c, long requestId, String reason) throws SQLException {
-        // Cập nhật trạng thái và ghi nhận lý do hủy (giả định cột cancellation_reason có tồn tại trong DB)
-        String sql = "UPDATE service_requests SET status = 'CANCELLED', cancellation_reason = ? WHERE service_request_id = ?";
+        String sql = "UPDATE service_requests SET status_code = 'CANCELLED', notes = ? WHERE service_request_id = ?";
         try(PreparedStatement p = c.prepareStatement(sql)) {
             p.setString(1, reason);
             p.setLong(2, requestId);
@@ -58,8 +64,9 @@ public class ServiceRequestDaoImpl implements ServiceRequestDao {
             list.add(new ServiceRequestDto(
                     rs.getLong("service_request_id"), rs.getLong("reservation_id"), rs.getLong("customer_id"),
                     rs.getLong("hotel_service_id"), rs.getString("service_name"), rs.getBigDecimal("quantity"),
-                    rs.getBigDecimal("unit_price"), rs.getBigDecimal("total_amount"), rs.getString("status"),
-                    rs.getObject("assigned_staff_id") != null ? rs.getLong("assigned_staff_id") : null,
+                    rs.getBigDecimal("unit_price_snapshot"), rs.getBigDecimal("total_amount"), rs.getString("status_code"),
+                    rs.getObject("assigned_staff_user_id") != null ? rs.getLong("assigned_staff_user_id") : null,
+                    "CANCELLED".equals(rs.getString("status_code")) ? rs.getString("notes") : null,
                     rs.getTimestamp("requested_at") != null ? rs.getTimestamp("requested_at").toLocalDateTime() : null
             ));
         }

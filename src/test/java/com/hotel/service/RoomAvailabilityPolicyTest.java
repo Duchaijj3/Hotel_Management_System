@@ -46,6 +46,11 @@ class RoomAvailabilityPolicyTest {
         assertFalse(blocks("CONFIRMED", MAY_12, LocalDate.of(2026, 5, 14)));
     }
 
+    @Test void stopSellClosesTheRoomTypeForThatDate() {
+        assertFalse(RoomAvailabilityPolicy.isSaleOpen(true));
+        assertTrue(RoomAvailabilityPolicy.isSaleOpen(false));
+    }
+
     private static boolean candidate(boolean roomActive, boolean typeActive, String operational,
                                      String cleaning, long actualType, long requestedType) {
         return RoomAvailabilityPolicy.isRoomCandidate(roomActive, typeActive, operational, cleaning,

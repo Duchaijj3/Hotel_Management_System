@@ -28,4 +28,8 @@ public final class RoomAvailabilityPolicy {
                 && existingCheckIn.isBefore(targetCheckOut)
                 && existingCheckOut.isAfter(targetCheckIn);
     }
+
+    public static boolean isSaleOpen(boolean stopSell) {
+        return !stopSell;
+    }
 }

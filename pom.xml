@@ -52,7 +52,6 @@
         <resources>
             <resource>
                 <directory>backend/resources</directory>
-                <excludes><exclude>database.properties</exclude></excludes>
             </resource>
         </resources>
         <finalName>HotelManagementSystem</finalName>

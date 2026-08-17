@@ -17,6 +17,8 @@ public class User {
     private String roleCode;               // CUSTOMER, RECEPTIONIST, SERVICE_STAFF, MANAGER, ADMIN
     private String departmentCode;         // For SERVICE_STAFF: GENERAL_SERVICE, HOUSEKEEPING, MAINTENANCE
     private String statusCode;             // ACTIVE, LOCKED, INACTIVE
+    private int failedLoginAttempts;
+    private LocalDateTime lockedUntil;
     private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -47,6 +49,14 @@ public class User {
 
     public String getStatusCode() { return statusCode; }
     public void setStatusCode(String statusCode) { this.statusCode = statusCode; }
+
+    public int getFailedLoginAttempts() { return failedLoginAttempts; }
+    public void setFailedLoginAttempts(int failedLoginAttempts) {
+        this.failedLoginAttempts = failedLoginAttempts;
+    }
+
+    public LocalDateTime getLockedUntil() { return lockedUntil; }
+    public void setLockedUntil(LocalDateTime lockedUntil) { this.lockedUntil = lockedUntil; }
 
     public LocalDateTime getLastLoginAt() { return lastLoginAt; }
     public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }

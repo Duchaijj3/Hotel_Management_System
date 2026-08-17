@@ -1,0 +1,15 @@
+<%@ page pageEncoding="UTF-8" %>
+<aside class="sidebar manager-sidebar">
+    <div class="staff-card">
+        <span class="avatar">MG</span>
+        <span class="staff-copy"><strong>Hotel Manager</strong><small><c:out value="${sessionScope.sessionUser.fullName}"/></small></span>
+    </div>
+    <nav class="side-nav" aria-label="Điều hướng Manager">
+        <p class="nav-label">MANAGER</p>
+        <a class="${activePage=='dashboard'?'active':''}" href="${pageContext.request.contextPath}/manager/dashboard"><span class="material-symbols-outlined" aria-hidden="true">dashboard</span>Tổng quan</a>
+        <p class="nav-label">ROOM &amp; PRICING</p>
+        <a class="${activePage=='rooms'?'active':''}" href="${pageContext.request.contextPath}/manager/rooms"><span class="material-symbols-outlined" aria-hidden="true">meeting_room</span>Phòng</a>
+        <a class="${activePage=='room-types'?'active':''}" href="${pageContext.request.contextPath}/manager/room-types"><span class="material-symbols-outlined" aria-hidden="true">bed</span>Loại phòng &amp; tiện nghi</a>
+        <a class="${activePage=='pricing'?'active':''}" href="${pageContext.request.contextPath}/manager/pricing"><span class="material-symbols-outlined" aria-hidden="true">sell</span>Giá phòng</a>
+    </nav>
+</aside>

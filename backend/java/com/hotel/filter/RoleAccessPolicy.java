@@ -14,6 +14,9 @@ public final class RoleAccessPolicy {
         if (applicationPath.startsWith("/receptionist/")) {
             return "RECEPTIONIST".equals(roleCode);
         }
+        if (applicationPath.startsWith("/admin/")) {
+            return "ADMIN".equals(roleCode);
+        }
         return true;
     }
 }

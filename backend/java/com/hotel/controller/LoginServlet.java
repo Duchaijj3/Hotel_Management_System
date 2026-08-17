@@ -84,6 +84,7 @@ public class LoginServlet extends HttpServlet {
         return switch (roleCode) {
             case "MANAGER" -> ManagerRoutes.DASHBOARD;
             case "RECEPTIONIST" -> "/receptionist/customers";
+            case "ADMIN" -> AdminRoutes.DASHBOARD;
             default -> "/";
         };
     }

@@ -1,27 +1,15 @@
 package com.hotel.dao;
 
-// File: src/main/java/com/hotel/dao/ServiceRequestDao.java
-
-import com.hotel.model.ServiceRequest;
+import com.hotel.dto.ServiceRequestDto;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO interface for ServiceRequest - updated with new fields and full staff workflow
- */
 public interface ServiceRequestDao {
-
-    // Create new request
-    void addServiceRequest(ServiceRequest request) throws Exception;
-
-    // Read operations
-    ServiceRequest getServiceRequestById(long serviceRequestId) throws Exception;
-    List<ServiceRequest> getPendingRequests() throws Exception;
-    List<ServiceRequest> getRequestsByStaffId(long staffUserId) throws Exception;
-    List<ServiceRequest> getServiceRequestsByReservation(long reservationId) throws Exception;
-    List<ServiceRequest> getCompletedRequestsByReservationId(long reservationId) throws Exception;
-
-    // Staff workflow actions
-    void assignStaff(long serviceRequestId, long staffUserId) throws Exception;
-    void updateStatus(long serviceRequestId, String statusCode) throws Exception;
-    void cancelRequest(long serviceRequestId, String reason) throws Exception;
+    List<ServiceRequestDto> findPending(Connection c) throws SQLException;
+    List<ServiceRequestDto> findAssignedTo(Connection c, long staffId) throws SQLException;
+    Optional<ServiceRequestDto> findById(Connection c, long requestId, boolean lock) throws SQLException;
+    int updateStatusAndStaff(Connection c, long requestId, String status, Long staffId) throws SQLException;
+    int cancelRequest(Connection c, long requestId, String reason) throws SQLException;
 }

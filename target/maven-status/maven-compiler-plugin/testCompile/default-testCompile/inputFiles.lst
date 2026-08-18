@@ -1,0 +1,16 @@
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\controller\LoginServletTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\controller\LogoutServletTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\controller\ManagerDashboardServletTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\controller\ManagerPricingServletTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\dto\RoomSearchCriteriaTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\filter\AuthenticationFilterTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\filter\AuthorizationFilterTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\filter\RoleAccessPolicyTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\integration\ManagerAuthenticationDatabaseIT.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\integration\ManagerRoomDatabaseIT.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\service\AuthServiceTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\service\impl\CustomerServiceImplTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\service\impl\FrontDeskServiceImplTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\service\impl\ManagerRoomServiceImplTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\service\impl\RoomAvailabilityServiceImplTest.java
+C:\Users\saiki\Desktop\Hoclaptrinh\2026\SU26\SWP391_BL5\Projects\Hotel_Management_System\src\test\java\com\hotel\service\RoomAvailabilityPolicyTest.java

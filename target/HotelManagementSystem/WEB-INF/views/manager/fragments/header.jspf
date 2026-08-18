@@ -1,0 +1,11 @@
+<%@ page pageEncoding="UTF-8" %>
+<header class="topbar">
+    <div class="manager-topbar-title"><strong>LuxeStay HMS</strong><span><c:out value="${empty pageTitle?'Manager':pageTitle}"/></span></div>
+    <div class="top-actions">
+        <span class="manager-identity"><strong><c:out value="${sessionScope.sessionUser.fullName}"/></strong><small>Manager</small></span>
+        <span class="role-chip">MANAGER</span>
+        <form class="logout-form" method="post" action="${pageContext.request.contextPath}/logout">
+            <button class="logout" type="submit" aria-label="Đăng xuất khỏi tài khoản Manager"><span class="material-symbols-outlined" aria-hidden="true">logout</span>Đăng xuất</button>
+        </form>
+    </div>
+</header>

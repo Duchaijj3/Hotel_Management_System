@@ -1,0 +1,12 @@
+<%@ page pageEncoding="UTF-8" %>
+<aside class="sidebar">
+    <div class="staff-card"><span class="avatar">LT</span><span class="staff-copy"><strong>Bộ phận lễ tân</strong><small><c:out value="${sessionScope.sessionUser.fullName}"/> • Đang làm việc</small></span></div>
+    <nav class="side-nav">
+        <p class="nav-label">NGHIỆP VỤ LỄ TÂN</p>
+        <a class="${activePage=='customers'?'active':''}" href="${pageContext.request.contextPath}/receptionist/customers"><span class="material-symbols-outlined">group</span>Quản lý khách hàng</a>
+        <a class="${activePage=='create'?'active':''}" href="${pageContext.request.contextPath}/receptionist/customers/create"><span class="material-symbols-outlined">person_add</span>Tạo khách vãng lai</a>
+        <a class="${activePage=='checkin'?'active':''}" href="${pageContext.request.contextPath}/receptionist/check-in"><span class="material-symbols-outlined">how_to_reg</span>Nhận phòng</a>
+        <a class="${activePage=='rooms'?'active':''}" href="${pageContext.request.contextPath}/receptionist/rooms/available"><span class="material-symbols-outlined">bed</span>Tra cứu phòng trống</a>
+        <a class="${activePage=='history'?'active':''}" href="${pageContext.request.contextPath}/receptionist/assignments/history"><span class="material-symbols-outlined">history</span>Lịch sử gán phòng</a>
+    </nav>
+</aside>

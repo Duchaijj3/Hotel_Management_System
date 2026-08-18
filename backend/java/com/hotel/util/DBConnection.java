@@ -12,6 +12,7 @@ public class DBConnection {
 
     private static final Properties PROPERTIES = new Properties();
 
+
     static {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");

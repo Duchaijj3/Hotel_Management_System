@@ -25,6 +25,8 @@ public class DBConnectionTest {
             System.out.println("URL: "
                     + connection.getMetaData().getURL());
 
+
+
         } catch (Exception e) {
 
             System.out.println("================================");

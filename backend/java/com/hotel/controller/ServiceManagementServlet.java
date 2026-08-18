@@ -1,11 +1,11 @@
-package com.hotel.controller;
+package java.com.hotel.controller;
 
 // File: src/main/java/com/hotel/controller/ServiceManagementServlet.java
 
 
-import com.hotel.model.HotelService;
-import com.hotel.service.ServiceManagementService;
-import com.hotel.service.impl.ServiceManagementServiceImpl;
+import java.com.hotel.model.HotelService;
+import java.com.hotel.service.ServiceManagementService;
+import java.com.hotel.service.impl.ServiceManagementServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

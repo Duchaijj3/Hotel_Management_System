@@ -22,7 +22,8 @@ import java.util.NoSuchElementException;
         "/admin/email-templates/view",
         "/admin/email-templates/create",
         "/admin/email-templates/edit",
-        "/admin/email-templates/toggle-active"
+        "/admin/email-templates/toggle-active",
+        "/admin/email-templates/delete"
 })
 public class AdminEmailTemplateServlet extends HttpServlet {
     private final AdminEmailService service = AdminServices.emails();
@@ -62,6 +63,12 @@ public class AdminEmailTemplateServlet extends HttpServlet {
                 service.setTemplateActive(id, active, actorId);
                 flash(request, active ? "Email template activated." : "Email template deactivated.");
                 redirectView(request, response, id);
+                return;
+            }
+            if ("/admin/email-templates/delete".equals(path)) {
+                service.deleteTemplate(requiredId(request), actorId);
+                flash(request, "Email template deleted.");
+                response.sendRedirect(request.getContextPath() + AdminRoutes.EMAIL_TEMPLATES);
                 return;
             }
 
@@ -130,28 +137,30 @@ public class AdminEmailTemplateServlet extends HttpServlet {
 
     private EmailTemplateForm bindForm(HttpServletRequest request, boolean update) {
         Long id = update ? requiredId(request) : null;
+        String bodyText = trim(request, "bodyText");
         return new EmailTemplateForm(
                 id,
                 trim(request, "templateCode"),
                 trim(request, "templateName"),
                 trim(request, "eventCode"),
                 trim(request, "subjectTemplate"),
-                trim(request, "bodyHtml"),
-                trim(request, "bodyText"),
+                bodyText,
+                bodyText,
                 "on".equals(request.getParameter("active")) || "true".equals(request.getParameter("active"))
         );
     }
 
     private EmailTemplateForm bindLenient(HttpServletRequest request) {
         Long id = safeLong(request.getParameter("id"));
+        String bodyText = trim(request, "bodyText");
         return new EmailTemplateForm(
                 id,
                 trim(request, "templateCode"),
                 trim(request, "templateName"),
                 trim(request, "eventCode"),
                 trim(request, "subjectTemplate"),
-                trim(request, "bodyHtml"),
-                trim(request, "bodyText"),
+                bodyText,
+                bodyText,
                 "on".equals(request.getParameter("active")) || "true".equals(request.getParameter("active"))
         );
     }

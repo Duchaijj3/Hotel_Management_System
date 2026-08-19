@@ -155,6 +155,33 @@ public class EmailTemplateDaoImpl implements EmailTemplateDao {
         }
     }
 
+    @Override
+    public boolean delete(long id) {
+        String updateDeliveriesSql = "UPDATE dbo.email_deliveries SET email_template_id = NULL WHERE email_template_id = ?";
+        String deleteTemplateSql = "DELETE FROM dbo.email_templates WHERE email_template_id = ?";
+        try (Connection connection = DBConnection.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement updateStmt = connection.prepareStatement(updateDeliveriesSql)) {
+                    updateStmt.setLong(1, id);
+                    updateStmt.executeUpdate();
+                }
+                int deletedRows;
+                try (PreparedStatement deleteStmt = connection.prepareStatement(deleteTemplateSql)) {
+                    deleteStmt.setLong(1, id);
+                    deletedRows = deleteStmt.executeUpdate();
+                }
+                connection.commit();
+                return deletedRows == 1;
+            } catch (SQLException exception) {
+                connection.rollback();
+                throw exception;
+            }
+        } catch (SQLException exception) {
+            throw new DataAccessException("Unable to delete email template", exception);
+        }
+    }
+
     private Optional<EmailTemplateDetailDto> findDetail(String where, Object value) {
         String sql = """
                 SELECT email_template_id, template_code, template_name, event_code,

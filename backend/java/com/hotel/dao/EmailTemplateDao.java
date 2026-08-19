@@ -22,4 +22,6 @@ public interface EmailTemplateDao {
     boolean update(EmailTemplateForm form, long actorId);
 
     boolean setActive(long id, boolean active, long actorId);
+
+    boolean delete(long id);
 }

@@ -74,6 +74,13 @@ public class AdminEmailServiceImpl implements AdminEmailService {
     }
 
     @Override
+    public void deleteTemplate(long id, long actorId) throws ValidationException {
+        if (id <= 0 || !templates.delete(id)) {
+            throw new ValidationException(Map.of("general", "Template not found."));
+        }
+    }
+
+    @Override
     public PageResult<EmailDeliveryDto> searchDeliveries(EmailDeliverySearchCriteria criteria) {
         return deliveries.search(criteria);
     }

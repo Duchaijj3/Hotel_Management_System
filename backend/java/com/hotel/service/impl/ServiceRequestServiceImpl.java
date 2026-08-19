@@ -1,174 +1,233 @@
-package java.com.hotel.service.impl;
+package com.hotel.service.impl;
 
+import com.hotel.dao.ServiceRequestDao;
+import com.hotel.dto.ServiceRequestDto;
+import com.hotel.exception.BusinessException;
+import com.hotel.exception.DataAccessException;
+import com.hotel.service.ServiceRequestService;
+import com.hotel.util.ConnectionProvider;
 
-import java.com.hotel.dao.HotelServiceDao;
-import java.com.hotel.dao.ServiceRequestDao;
-import java.com.hotel.dao.impl.HotelServiceDaoImpl;
-import java.com.hotel.dao.impl.ServiceRequestDaoImpl;
-import java.com.hotel.model.HotelService;
-import java.com.hotel.model.ServiceRequest;
-import java.com.hotel.service.ServiceRequestService;
-
-import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Implementation of ServiceRequestService
- * Handles business logic for processing guest service requests and staff workflow
- */
-
-
-import java.time.LocalDateTime;
-
-
-/**
- * Implementation of ServiceRequestService
- * Handles business logic for processing guest service requests and staff workflow
- */
 public class ServiceRequestServiceImpl implements ServiceRequestService {
 
-    private final ServiceRequestDao serviceRequestDao;
-    private final HotelServiceDao hotelServiceDao;
+    private final ServiceRequestDao dao;
+    private final ConnectionProvider connections;
 
-    // Default constructor using JDBC implementations
-    public ServiceRequestServiceImpl() {
-        this.serviceRequestDao = new ServiceRequestDaoImpl();
-        this.hotelServiceDao = new HotelServiceDaoImpl();
+    public ServiceRequestServiceImpl(
+            ServiceRequestDao dao,
+            ConnectionProvider connections
+    ) {
+        this.dao = dao;
+        this.connections = connections;
     }
 
-    // Constructor injection for testing/flexibility
-    public ServiceRequestServiceImpl(ServiceRequestDao serviceRequestDao, HotelServiceDao hotelServiceDao) {
-        this.serviceRequestDao = serviceRequestDao;
-        this.hotelServiceDao = hotelServiceDao;
-    }
-
-    // Guest requests service
     @Override
-    public void requestService(long reservationId, long customerId, long hotelServiceId, BigDecimal quantity) throws Exception {
-        // 1. Validation
-        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Số lượng dịch vụ phải lớn hơn 0");
+    public List<ServiceRequestDto> getPendingRequests() {
+        try (Connection connection = connections.getConnection()) {
+            return dao.findPending(connection);
+        } catch (SQLException exception) {
+            throw data("Không thể tải danh sách yêu cầu dịch vụ chờ nhận.", exception);
         }
-
-        // 2. Fetch target service to check price and active status
-        HotelService service = hotelServiceDao.getServiceById(hotelServiceId);
-        if (service == null || !service.isActive()) {
-            throw new IllegalArgumentException("Dịch vụ không tồn tại hoặc hiện tại ngừng cung cấp");
-        }
-
-        // 3. Calculate total amount = unit_price * quantity
-        BigDecimal totalAmount = service.getUnitPrice().multiply(quantity);
-
-        // 4. Create new ServiceRequest entity
-        ServiceRequest request = new ServiceRequest();
-        request.setReservationId(reservationId);
-        request.setCustomerId(customerId);
-        request.setHotelServiceId(hotelServiceId);
-        request.setQuantity(quantity);
-        request.setUnitPrice(service.getUnitPrice()); // Sẽ lưu vào unitPriceSnapshot nhờ helper method
-        request.setTotalAmount(totalAmount);
-        request.setStatus("PENDING");                 // Sẽ lưu vào statusCode
-        request.setRequestedAt(LocalDateTime.now());
-        request.setCreatedAt(LocalDateTime.now());
-
-        serviceRequestDao.addServiceRequest(request);
     }
 
-    // Staff management: Get all requests waiting to be assigned or processed
     @Override
-    public List<ServiceRequest> getPendingRequests() throws Exception {
-        return serviceRequestDao.getPendingRequests();
+    public List<ServiceRequestDto> getMyRequests(long staffId) {
+        try (Connection connection = connections.getConnection()) {
+            return dao.findAssignedTo(connection, staffId);
+        } catch (SQLException exception) {
+            throw data("Không thể tải danh sách yêu cầu dịch vụ của bạn.", exception);
+        }
     }
 
-    // Staff management: Get requests assigned to a specific staff member
     @Override
-    public List<ServiceRequest> getAssignedToMe(long staffUserId) throws Exception {
-        if (staffUserId <= 0) {
-            throw new IllegalArgumentException("Mã nhân viên không hợp lệ");
-        }
-        return serviceRequestDao.getRequestsByStaffId(staffUserId);
-    }
+    public void acceptRequest(long requestId, long staffId)
+            throws BusinessException {
+        tx(connection -> {
+            ServiceRequestDto request = findForUpdate(connection, requestId);
 
-    // Staff management: Assign request to staff member
-    @Override
-    public void assignServiceToStaff(long serviceRequestId, long staffUserId) throws Exception {
-        ServiceRequest request = serviceRequestDao.getServiceRequestById(serviceRequestId);
-        if (request == null) {
-            throw new IllegalArgumentException("Không tìm thấy yêu cầu dịch vụ với ID: " + serviceRequestId);
-        }
-
-        serviceRequestDao.assignStaff(serviceRequestId, staffUserId);
-    }
-
-    // Staff management: Start executing the service (PENDING/ASSIGNED -> IN_PROGRESS)
-    @Override
-    public void startService(long serviceRequestId) throws Exception {
-        ServiceRequest request = serviceRequestDao.getServiceRequestById(serviceRequestId);
-        if (request == null) {
-            throw new IllegalArgumentException("Không tìm thấy yêu cầu dịch vụ với ID: " + serviceRequestId);
-        }
-
-        // Status check: Only PENDING or ASSIGNED requests can be started
-        String currentStatus = request.getStatus();
-        if (!"PENDING".equalsIgnoreCase(currentStatus) && !"ASSIGNED".equalsIgnoreCase(currentStatus)) {
-            throw new IllegalArgumentException("Chỉ có thể bắt đầu xử lý yêu cầu đang ở trạng thái 'PENDING' hoặc 'ASSIGNED'");
-        }
-
-        serviceRequestDao.updateStatus(serviceRequestId, "IN_PROGRESS");
-    }
-
-    // Staff management: Complete the service (IN_PROGRESS -> COMPLETED)
-    @Override
-    public void completeService(long serviceRequestId) throws Exception {
-        ServiceRequest request = serviceRequestDao.getServiceRequestById(serviceRequestId);
-        if (request == null) {
-            throw new IllegalArgumentException("Không tìm thấy yêu cầu dịch vụ với ID: " + serviceRequestId);
-        }
-
-        // Status check: Only IN_PROGRESS requests can be completed
-        if (!"IN_PROGRESS".equalsIgnoreCase(request.getStatus())) {
-            throw new IllegalArgumentException("Chỉ có thể hoàn thành yêu cầu đang ở trạng thái 'IN_PROGRESS'");
-        }
-
-        serviceRequestDao.updateStatus(serviceRequestId, "COMPLETED");
-    }
-
-    // Staff management: Cancel request with a reason
-    @Override
-    public void cancelService(long serviceRequestId, String reason) throws Exception {
-        ServiceRequest request = serviceRequestDao.getServiceRequestById(serviceRequestId);
-        if (request == null) {
-            throw new IllegalArgumentException("Không tìm thấy yêu cầu dịch vụ với ID: " + serviceRequestId);
-        }
-
-        if ("COMPLETED".equalsIgnoreCase(request.getStatus())) {
-            throw new IllegalArgumentException("Không thể hủy dịch vụ đã hoàn thành");
-        }
-
-        serviceRequestDao.cancelRequest(serviceRequestId, reason);
-    }
-
-    // Billing integration: Fetch completed services for checkout billing
-    @Override
-    public List<ServiceRequest> getCompletedServicesForReservation(long reservationId) throws Exception {
-        if (reservationId <= 0) {
-            throw new IllegalArgumentException("Mã đặt phòng không hợp lệ");
-        }
-        return serviceRequestDao.getCompletedRequestsByReservationId(reservationId);
-    }
-
-    // Billing integration: Sum total costs of all completed services for checkout invoice
-    @Override
-    public BigDecimal calculateServiceChargesForReservation(long reservationId) throws Exception {
-        List<ServiceRequest> completedRequests = getCompletedServicesForReservation(reservationId);
-        BigDecimal totalCharges = BigDecimal.ZERO;
-
-        for (ServiceRequest request : completedRequests) {
-            if (request.getTotalAmount() != null) {
-                totalCharges = totalCharges.add(request.getTotalAmount());
+            if (!"PENDING".equals(request.status())) {
+                throw new BusinessException(
+                        "Chỉ có thể nhận yêu cầu đang chờ tiếp nhận."
+                );
             }
+
+            ensureUpdated(dao.updateStatusAndStaff(
+                    connection,
+                    requestId,
+                    "ASSIGNED",
+                    staffId
+            ));
+
+            return null;
+        });
+    }
+
+    @Override
+    public void startRequest(long requestId, long staffId)
+            throws BusinessException {
+        tx(connection -> {
+            ServiceRequestDto request = findForUpdate(connection, requestId);
+            validateOwnership(request, staffId);
+
+            if (!"ASSIGNED".equals(request.status())) {
+                throw new BusinessException(
+                        "Chỉ có thể bắt đầu yêu cầu đã được nhận."
+                );
+            }
+
+            ensureUpdated(dao.updateStatusAndStaff(
+                    connection,
+                    requestId,
+                    "IN_PROGRESS",
+                    staffId
+            ));
+
+            return null;
+        });
+    }
+
+    @Override
+    public void completeRequest(long requestId, long staffId)
+            throws BusinessException {
+        tx(connection -> {
+            ServiceRequestDto request = findForUpdate(connection, requestId);
+            validateOwnership(request, staffId);
+
+            if (!"IN_PROGRESS".equals(request.status())) {
+                throw new BusinessException(
+                        "Chỉ có thể hoàn thành yêu cầu đang thực hiện."
+                );
+            }
+
+            ensureUpdated(dao.updateStatusAndStaff(
+                    connection,
+                    requestId,
+                    "COMPLETED",
+                    staffId
+            ));
+
+            return null;
+        });
+    }
+
+    @Override
+    public void cancelRequest(
+            long requestId,
+            long staffId,
+            String cancellationReason
+    ) throws BusinessException {
+        if (cancellationReason == null || cancellationReason.isBlank()) {
+            throw new BusinessException("Lý do hủy là bắt buộc.");
         }
 
-        return totalCharges;
+        tx(connection -> {
+            ServiceRequestDto request = findForUpdate(connection, requestId);
+
+            if ("COMPLETED".equals(request.status())) {
+                throw new BusinessException(
+                        "Không thể hủy yêu cầu đã hoàn thành."
+                );
+            }
+
+            if ("CANCELLED".equals(request.status())) {
+                throw new BusinessException("Yêu cầu này đã được hủy.");
+            }
+
+            if (request.assignedStaffId() != null
+                    && request.assignedStaffId() != staffId) {
+                throw new BusinessException(
+                        "Bạn không thể hủy yêu cầu do nhân viên khác xử lý."
+                );
+            }
+
+            ensureUpdated(dao.cancelRequest(
+                    connection,
+                    requestId,
+                    cancellationReason.trim()
+            ));
+
+            return null;
+        });
+    }
+
+    private ServiceRequestDto findForUpdate(
+            Connection connection,
+            long requestId
+    ) throws SQLException, BusinessException {
+        return dao.findById(connection, requestId, true)
+                .orElseThrow(() -> new BusinessException(
+                        "Yêu cầu dịch vụ không tồn tại."
+                ));
+    }
+
+    private void validateOwnership(ServiceRequestDto request, long staffId)
+            throws BusinessException {
+        if (request.assignedStaffId() == null
+                || request.assignedStaffId() != staffId) {
+            throw new BusinessException(
+                    "Bạn không có quyền xử lý yêu cầu của nhân viên khác."
+            );
+        }
+    }
+
+    private void ensureUpdated(int affectedRows) throws BusinessException {
+        if (affectedRows != 1) {
+            throw new BusinessException(
+                    "Không thể cập nhật yêu cầu dịch vụ. Vui lòng thử lại."
+            );
+        }
+    }
+
+    private DataAccessException data(String message, SQLException exception) {
+        return new DataAccessException(message, exception);
+    }
+
+    private <T> T tx(Work<T> work) throws BusinessException {
+        try (Connection connection = connections.getConnection()) {
+            boolean autoCommit = connection.getAutoCommit();
+            int isolation = connection.getTransactionIsolation();
+
+            try {
+                connection.setAutoCommit(false);
+                connection.setTransactionIsolation(
+                        Connection.TRANSACTION_SERIALIZABLE
+                );
+
+                T result = work.run(connection);
+                connection.commit();
+                return result;
+            } catch (BusinessException exception) {
+                rollback(connection);
+                throw exception;
+            } catch (SQLException exception) {
+                rollback(connection);
+                throw data("Lỗi giao dịch cơ sở dữ liệu.", exception);
+            } finally {
+                try {
+                    connection.setTransactionIsolation(isolation);
+                    connection.setAutoCommit(autoCommit);
+                } catch (SQLException ignored) {
+                    // Connection sẽ được đóng bởi try-with-resources.
+                }
+            }
+        } catch (SQLException exception) {
+            throw data("Không thể kết nối cơ sở dữ liệu.", exception);
+        }
+    }
+
+    private void rollback(Connection connection) {
+        try {
+            connection.rollback();
+        } catch (SQLException ignored) {
+            // Giữ exception gốc.
+        }
+    }
+
+    @FunctionalInterface
+    private interface Work<T> {
+        T run(Connection connection) throws SQLException, BusinessException;
     }
 }

@@ -6,11 +6,9 @@
     <section class="login-hero"><span class="hotel-mark">domain</span><h1>Welcome Back</h1><p>Đăng nhập để truy cập cổng quản lý</p></section>
     <section class="login-body">
         <div class="login-tabs"><span class="active">Đăng nhập</span><span>Đăng ký</span></div>
-        <c:if test="${not empty error}"><p class="alert error" data-message-code="${errorCode}"><c:out value="${error}"/></p></c:if>
-        <form action="${pageContext.request.contextPath}/login"
-              method="post"
-              class="stack-form">
-            <label>Email<div class="input-icon"><span class="material-symbols-outlined">person</span><input type="email" name="email" value="<c:out value='${email}'/>" autocomplete="username" required placeholder="Nhập Email"></div></label>
+        <c:if test="${not empty error}"><p class="alert error"><c:out value="${error}"/></p></c:if>
+        <form method="post" class="stack-form">
+            <label>Email hoặc tên đăng nhập<div class="input-icon"><span class="material-symbols-outlined">person</span><input type="email" name="email" autocomplete="username" required placeholder="receptionist@hotel.local"></div></label>
             <label>Mật khẩu<div class="input-icon"><span class="material-symbols-outlined">lock</span><input type="password" name="password" autocomplete="current-password" required placeholder="Nhập mật khẩu"></div></label>
             <div class="login-options"><label><input type="checkbox" name="remember"> Ghi nhớ tôi</label><a href="#">Quên mật khẩu?</a></div>
             <button class="primary wide" type="submit">Đăng nhập <span class="material-symbols-outlined">arrow_forward</span></button>

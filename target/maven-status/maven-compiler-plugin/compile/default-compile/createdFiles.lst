@@ -140,7 +140,6 @@ com\hotel\dao\impl\PublicRoomDaoImpl.class
 com\hotel\dto\AssignmentTargetDto.class
 com\hotel\dto\ProfileFormDto.class
 com\hotel\filter\RoleAccessPolicy.class
-com\hotel\controller\ServiceManagementServlet.class
 com\hotel\model\HousekeepingTask.class
 com\hotel\exception\ValidationException.class
 com\hotel\service\impl\AdminEmailServiceImpl.class

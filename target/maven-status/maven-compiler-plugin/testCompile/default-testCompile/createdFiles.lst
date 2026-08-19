@@ -1,0 +1,11 @@
+com\hotel\controller\LoginServletTest.class
+com\hotel\integration\ManagerRoomDatabaseIT.class
+com\hotel\service\impl\ManagerRoomServiceImplTest$InMemoryManagerRoomDao.class
+com\hotel\service\RoomAvailabilityPolicyTest.class
+com\hotel\service\AuthServiceTest$InMemoryUserDao.class
+com\hotel\integration\ManagerAuthenticationDatabaseIT.class
+com\hotel\service\impl\ManagerRoomServiceImplTest.class
+com\hotel\filter\RoleAccessPolicyTest.class
+com\hotel\service\AuthServiceTest.class
+com\hotel\service\impl\CustomerServiceImplTest.class
+com\hotel\service\impl\FrontDeskServiceImplTest.class

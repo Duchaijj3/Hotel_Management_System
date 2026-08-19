@@ -1,0 +1,6 @@
+<%@ page pageEncoding="UTF-8" %>
+<header class="topbar">
+    <div><strong>LuxeStay HMS</strong></div>
+    <div class="global-search"><span class="material-symbols-outlined">search</span><input aria-label="Tìm kiếm toàn hệ thống" placeholder="Tìm khách, phòng, mã đặt chỗ..."></div>
+    <div class="top-actions"><button class="icon-button" type="button" title="Thông báo"><span class="material-symbols-outlined">notifications</span></button><button class="icon-button" type="button" title="Trợ giúp"><span class="material-symbols-outlined">help_outline</span></button><form class="logout-form" method="post" action="${pageContext.request.contextPath}/logout"><button class="logout" type="submit"><span class="material-symbols-outlined">account_circle</span>Đăng xuất</button></form></div>
+</header>

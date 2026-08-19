@@ -50,7 +50,6 @@ com\hotel\model\HotelService.class
 com\hotel\dao\UserDao.class
 com\hotel\dao\impl\AdminUserDaoImpl.class
 com\hotel\dto\HousekeepingTaskDto.class
-com\hotel\filter\StaffAuthorizationFilter.class
 com\hotel\controller\ManagerPricingServlet$PricingFilter.class
 com\hotel\dao\impl\UserDaoImpl.class
 com\hotel\dto\CheckInDto.class

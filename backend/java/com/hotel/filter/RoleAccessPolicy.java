@@ -2,32 +2,34 @@ package com.hotel.filter;
 
 public final class RoleAccessPolicy {
 
-    private RoleAccessPolicy() {
-    }
+    private RoleAccessPolicy() {}
 
     public static boolean canAccess(String roleCode, String applicationPath) {
+// THÊM DÒNG NÀY ĐỂ DEBUG:
+        System.out.println(">>> DEBUG FILTER | roleCode: [" + roleCode + "] | path: [" + applicationPath + "]");
+
         if (roleCode == null || applicationPath == null) {
             return false;
         }
+        // ... các đoạn code bên dưới giữ nguyên
 
-        if (applicationPath.startsWith("/admin/")) {
-            return "ADMIN".equals(roleCode);
+        String role = roleCode.trim();
+        String path = applicationPath.toLowerCase();
+
+        if (path.startsWith("/admin/")) {
+            return "ADMIN".equalsIgnoreCase(role);
         }
-
-        if (applicationPath.startsWith("/manager/")) {
-            return "MANAGER".equals(roleCode);
+        if (path.startsWith("/manager/")) {
+            return "MANAGER".equalsIgnoreCase(role);
         }
-
-        if (applicationPath.startsWith("/receptionist/")) {
-            return "RECEPTIONIST".equals(roleCode);
+        if (path.startsWith("/receptionist/")) {
+            return "RECEPTIONIST".equalsIgnoreCase(role);
         }
-
-        if (applicationPath.startsWith("/staff/housekeeping")) {
-            return "HOUSEKEEPING_STAFF".equals(roleCode);
+        if (path.startsWith("/staff/housekeeping")) {
+            return "HOUSEKEEPING_STAFF".equalsIgnoreCase(role);
         }
-
-        if (applicationPath.startsWith("/staff/service-requests")) {
-            return "SERVICE_STAFF".equals(roleCode);
+        if (path.startsWith("/staff/service-requests")) {
+            return "SERVICE_STAFF".equalsIgnoreCase(role);
         }
 
         return false;

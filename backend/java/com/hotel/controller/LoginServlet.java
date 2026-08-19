@@ -48,4 +48,15 @@ public class LoginServlet extends HttpServlet {
 
         s.sendRedirect(q.getContextPath() + redirectPath);
     }
+
+    private String landingPage(String roleCode) {
+        return switch (roleCode) {
+            case "HOUSEKEEPING_STAFF" -> "/staff/housekeeping";
+            case "SERVICE_STAFF" -> "/staff/service-requests";
+            case "MANAGER" -> ManagerRoutes.DASHBOARD;
+            case "RECEPTIONIST" -> "/receptionist/customers";
+            case "ADMIN" -> AdminRoutes.DASHBOARD;
+            default -> "/";
+        };
+    }
 }

@@ -1,5 +1,3 @@
-
-
 package com.hotel.filter;
 
 import com.hotel.dto.SessionUser;
@@ -19,37 +17,37 @@ import java.io.IOException;
 public class StaffAuthorizationFilter implements Filter {
 
     @Override
-    public void doFilter(ServletRequest request,
-                         ServletResponse response,
-                         FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(
+            ServletRequest request,
+            ServletResponse response,
+            FilterChain chain
+    ) throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        HttpServletRequest req = (HttpServletRequest) request;
-        HttpServletResponse resp = (HttpServletResponse) response;
+        HttpSession session = httpRequest.getSession(false);
 
-        HttpSession session = req.getSession(false);
         SessionUser user = session == null
                 ? null
                 : (SessionUser) session.getAttribute("sessionUser");
 
         if (user == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
+            httpResponse.sendRedirect(
+                    httpRequest.getContextPath() + "/login"
+            );
             return;
         }
 
-        String path = req.getRequestURI()
-                .substring(req.getContextPath().length());
+        String path = httpRequest.getRequestURI()
+                .substring(httpRequest.getContextPath().length());
 
-        boolean isHousekeepingRoute = path.startsWith("/staff/housekeeping");
-        boolean isServiceRequestRoute = path.startsWith("/staff/service-requests");
-
-        boolean allowed = (isHousekeepingRoute
-                && "HOUSEKEEPING_STAFF".equals(user.roleCode()))
-                || (isServiceRequestRoute
-                && "SERVICE_STAFF".equals(user.roleCode()));
+        boolean allowed = RoleAccessPolicy.canAccess(
+                user.roleCode(),
+                path
+        );
 
         if (!allowed) {
-            resp.sendError(
+            httpResponse.sendError(
                     HttpServletResponse.SC_FORBIDDEN,
                     "You do not have permission to access this resource."
             );

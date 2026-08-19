@@ -43,7 +43,14 @@
                     </label>
 
                     <label>Mã sự kiện Trigger *
-                        <input name="eventCode" value="<c:out value='${item.eventCode}'/>" required placeholder="ví dụ: F25 hoặc F06">
+                        <select name="eventCode" required>
+                            <option value="">-- Chọn sự kiện kích hoạt --</option>
+                            <option value="ACCOUNT_ACTIVATION" ${item.eventCode=='ACCOUNT_ACTIVATION'?'selected':''}>Kích hoạt tài khoản (ACCOUNT_ACTIVATION)</option>
+                            <option value="PASSWORD_RESET" ${item.eventCode=='PASSWORD_RESET'?'selected':''}>Đặt lại mật khẩu (PASSWORD_RESET)</option>
+                            <option value="ACCOUNT_VERIFICATION" ${item.eventCode=='ACCOUNT_VERIFICATION'?'selected':''}>Xác minh tài khoản (ACCOUNT_VERIFICATION)</option>
+                            <option value="RESERVATION_CONFIRMED" ${item.eventCode=='RESERVATION_CONFIRMED'?'selected':''}>Xác nhận đặt phòng (RESERVATION_CONFIRMED)</option>
+                            <option value="CHECK_IN_REMINDER" ${item.eventCode=='CHECK_IN_REMINDER'?'selected':''}>Nhắc nhở nhận phòng (CHECK_IN_REMINDER)</option>
+                        </select>
                         <span class="field-error"><c:out value="${errors.eventCode}"/></span>
                     </label>
 
@@ -57,13 +64,8 @@
                         <span class="field-error"><c:out value="${errors.subjectTemplate}"/></span>
                     </label>
 
-                    <label class="span-2">Nội dung HTML (Body HTML) *
-                        <textarea name="bodyHtml" rows="10" required placeholder="Nhập mã HTML của thư..."><c:out value="${item.bodyHtml}"/></textarea>
-                        <span class="field-error"><c:out value="${errors.bodyHtml}"/></span>
-                    </label>
-
                     <label class="span-2">Nội dung văn bản thường (Body Plain Text) *
-                        <textarea name="bodyText" rows="6" required placeholder="Nhập nội dung văn bản thường của thư để dự phòng..."><c:out value="${item.bodyText}"/></textarea>
+                        <textarea name="bodyText" rows="10" required placeholder="Nhập nội dung văn bản thường của thư..."><c:out value="${item.bodyText}"/></textarea>
                         <span class="field-error"><c:out value="${errors.bodyText}"/></span>
                     </label>
                 </div>

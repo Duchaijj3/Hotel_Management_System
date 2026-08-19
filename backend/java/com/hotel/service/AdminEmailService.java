@@ -23,6 +23,8 @@ public interface AdminEmailService {
 
     void setTemplateActive(long id, boolean active, long actorId) throws ValidationException;
 
+    void deleteTemplate(long id, long actorId) throws ValidationException;
+
     PageResult<EmailDeliveryDto> searchDeliveries(EmailDeliverySearchCriteria criteria);
 
     void retryDelivery(long deliveryId) throws ValidationException;
